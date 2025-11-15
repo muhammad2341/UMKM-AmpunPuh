@@ -3,10 +3,27 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Edit2, Trash2, ChevronLeft, MapPin, Phone, Tag, Package, TrendingUp, BarChart3, MessageSquare, Star, Send } from "lucide-react";
+// BARU: Tambahkan Loader2
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  ChevronLeft,
+  MapPin,
+  Phone,
+  Tag,
+  Package,
+  TrendingUp,
+  BarChart3,
+  MessageSquare,
+  Star,
+  Send,
+  Loader2,
+} from "lucide-react";
 import type { Product, Store } from "../types";
-import { useAuth } from "../contexts/AuthContext";
-import { stores as dummyStores, products as dummyProducts } from "../data/dummy";
+import { useAuth } from "../contexts/AuthContext"; // Ini adalah AuthContext baru
+import { supabase } from "../supabaseClient"; // BARU: Impor Supabase
+// DIHAPUS: dummyStores dan dummyProducts tidak lagi digunakan
 
 export const DashboardSeller: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +37,7 @@ export const DashboardSeller: React.FC = () => {
 
   const [storeData, setStoreData] = useState<Store | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // BARU
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -47,7 +65,7 @@ export const DashboardSeller: React.FC = () => {
     { id: "2", customerName: "Siti Aminah", rating: 4, comment: "Kualitas oke, harga terjangkau.", date: "2024-11-12", response: "Terima kasih atas reviewnya!" },
     { id: "3", customerName: "Ahmad Rizki", rating: 5, comment: "Pelayanan ramah, barang sesuai ekspektasi.", date: "2024-11-14", response: "" },
   ]);
-  const [responseText, setResponseText] = useState<{[key: string]: string}>({});
+  const [responseText, setResponseText] = useState<{ [key: string]: string }>({});
 
   // Dummy sales data for chart
   const salesData = [
@@ -60,43 +78,60 @@ export const DashboardSeller: React.FC = () => {
   ];
   const maxSales = Math.max(...salesData.map(d => d.sales));
 
-  // Load store and products based on logged-in seller
+  // DIGANTI: Load store and products based on logged-in seller from Supabase
   useEffect(() => {
-    if (!user) return;
+    async function loadSellerData() {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
 
-    // Get user's store data from dummyAccounts
-    const userAccount = JSON.parse(localStorage.getItem("umkm_users") || "[]").find(
-      (u: any) => u.email === user.email
-    );
+      setIsLoading(true);
 
-    if (userAccount && userAccount.storeId) {
-      // Load store from localStorage or dummy data
-      const savedStores = JSON.parse(localStorage.getItem("seller_stores") || "{}");
-      const store = savedStores[userAccount.storeId] || dummyStores.find((s) => s.id === userAccount.storeId);
-      
-      if (store) {
-        setStoreData(store);
+      // 1. Ambil data toko (store) milik user yang sedang login
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('owner_id', user.id) // Cocokkan dengan ID user
+        .single(); // Asumsi penjual hanya punya 1 toko
+
+      if (storeError && storeError.code !== 'PGRST116') { // PGRST116 = baris tidak ditemukan
+        console.error('Error fetching store:', storeError.message);
+      } else if (storeData) {
+        setStoreData(storeData as Store);
+
+        // Isi form edit dengan data dari DB
         setEditStoreForm({
-          name: store.name,
-          description: store.description,
-          address: store.address,
-          whatsapp: store.whatsapp,
-          category: store.category || "",
-          openingTime: store.openingTime || "",
-          closingTime: store.closingTime || "",
+          name: storeData.name,
+          description: storeData.description,
+          address: storeData.address,
+          whatsapp: storeData.whatsapp,
+          category: storeData.category || "",
+          openingTime: storeData.openingTime || "",
+          closingTime: storeData.closingTime || "",
         });
 
-        // Load products from localStorage first, fallback to dummy data
-        const savedProducts = JSON.parse(localStorage.getItem("seller_products") || "{}");
-        const storeProducts = savedProducts[userAccount.storeId] || 
-          dummyProducts.filter((p) => p.storeId === userAccount.storeId);
-        setProducts(storeProducts);
-      }
-    }
-  }, [user]);
+        // 2. Ambil produk HANYA untuk toko ini
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('store_id', storeData.id); // Cocokkan dengan ID toko
 
-  // Add or update product
-  const handleAddProduct = (e: React.FormEvent) => {
+        if (productsError) {
+          console.error('Error fetching products:', productsError.message);
+        } else if (productsData) {
+          setProducts(productsData as Product[]);
+        }
+      }
+
+      setIsLoading(false);
+    }
+
+    loadSellerData();
+  }, [user]); // Tetap bergantung pada 'user'
+
+  // DIGANTI: Add or update product ke Supabase
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!storeData) {
@@ -109,72 +144,87 @@ export const DashboardSeller: React.FC = () => {
       return;
     }
 
+    // Ubah string kosong menjadi null untuk Supabase
+    const parseNumeric = (val: string) => val ? parseFloat(val) : null;
+    const parseIntNumeric = (val: string) => val ? parseInt(val) : null;
+
     if (editingProduct) {
-      // Update existing product
-      const updatedProduct: Product = {
-        ...editingProduct,
-        name: newProduct.name,
-        category: newProduct.category,
-        price: Number.parseFloat(newProduct.price),
-        originalPrice: newProduct.originalPrice
-          ? Number.parseFloat(newProduct.originalPrice)
-          : undefined,
-        image: newProduct.image,
-        description: newProduct.description,
-        stock: newProduct.stock ? Number.parseInt(newProduct.stock) : undefined,
-      };
+      // Update produk yang ada di Supabase
+      const { data: updatedProduct, error } = await supabase
+        .from('products')
+        .update({
+          name: newProduct.name,
+          category: newProduct.category,
+          price: parseNumeric(newProduct.price),
+          original_price: parseNumeric(newProduct.originalPrice),
+          image: newProduct.image || null,
+          description: newProduct.description || null,
+          stock: parseIntNumeric(newProduct.stock),
+        })
+        .eq('id', editingProduct.id) // Tentukan produk mana yang di-update
+        .select()
+        .single();
 
-      const updatedProducts = products.map((p) =>
-        p.id === editingProduct.id ? updatedProduct : p
-      );
-      setProducts(updatedProducts);
-      
-      // Save to localStorage
-      saveProductsToLocalStorage(updatedProducts);
-      setEditingProduct(null);
+      if (error) {
+        alert(`Gagal memperbarui produk: ${error.message}`);
+      } else if (updatedProduct) {
+        // Update state React secara lokal
+        setProducts(products.map((p) => (p.id === editingProduct.id ? (updatedProduct as Product) : p)));
+        setEditingProduct(null);
+        setShowAddModal(false);
+      }
     } else {
-      // Add new product
-      const newId = `product-${Date.now()}`;
-      const product: Product = {
-        id: newId,
-        name: newProduct.name,
-        category: newProduct.category,
-        price: Number.parseFloat(newProduct.price),
-        originalPrice: newProduct.originalPrice
-          ? Number.parseFloat(newProduct.originalPrice)
-          : undefined,
-        image: newProduct.image,
-        rating: 0,
-        reviews: 0,
-        storeId: storeData.id,
-        storeName: storeData.name,
-        description: newProduct.description,
-        stock: newProduct.stock ? Number.parseInt(newProduct.stock) : undefined,
-      };
+      // Tambah produk baru ke Supabase
+      const { data: newProductData, error } = await supabase
+        .from('products')
+        .insert({
+          name: newProduct.name,
+          category: newProduct.category,
+          price: parseNumeric(newProduct.price),
+          original_price: parseNumeric(newProduct.originalPrice),
+          image: newProduct.image || null,
+          description: newProduct.description || null,
+          stock: parseIntNumeric(newProduct.stock),
+          store_id: storeData.id, // WAJIB: Tautkan ke ID toko
+          storeName: storeData.name, // Denormalisasi nama toko
+          rating: 0, // Default
+          reviews: 0, // Default
+        })
+        .select()
+        .single();
 
-      const updatedProducts = [...products, product];
-      setProducts(updatedProducts);
-      
-      // Save to localStorage
-      saveProductsToLocalStorage(updatedProducts);
+      if (error) {
+        alert(`Gagal menambah produk: ${error.message}`);
+      } else if (newProductData) {
+        // Tambahkan produk baru ke state React secara lokal
+        setProducts([...products, newProductData as Product]);
+        setShowAddModal(false);
+      }
     }
 
+    // Reset form
     setNewProduct({
-      name: "",
-      category: "",
-      price: "",
-      originalPrice: "",
-      image: "",
-      description: "",
-      stock: "",
+      name: "", category: "", price: "", originalPrice: "", image: "", description: "", stock: "",
     });
-    setShowAddModal(false);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    const updatedProducts = products.filter((p) => p.id !== id);
-    setProducts(updatedProducts);
-    saveProductsToLocalStorage(updatedProducts);
+  // DIGANTI: Hapus produk dari Supabase
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return;
+
+    // Hapus dari Supabase
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert(`Gagal menghapus produk: ${error.message}`);
+    } else {
+      // Hapus dari state React secara lokal
+      const updatedProducts = products.filter((p) => p.id !== id);
+      setProducts(updatedProducts);
+    }
   };
 
   const handleEditProduct = (product: Product) => {
@@ -191,53 +241,68 @@ export const DashboardSeller: React.FC = () => {
     setShowAddModal(true);
   };
 
-  const handleUpdateStore = (e: React.FormEvent) => {
+  // DIGANTI: Update info toko di Supabase
+  const handleUpdateStore = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!storeData) return;
 
-    const updatedStore: Store = {
-      ...storeData,
-      name: editStoreForm.name,
-      description: editStoreForm.description,
-      address: editStoreForm.address,
-      whatsapp: editStoreForm.whatsapp,
-      category: editStoreForm.category,
-      openingTime: editStoreForm.openingTime,
-      closingTime: editStoreForm.closingTime,
-    };
+    // Update data toko di Supabase
+    const { data: updatedStore, error } = await supabase
+      .from('stores')
+      .update({
+        name: editStoreForm.name,
+        description: editStoreForm.description,
+        address: editStoreForm.address,
+        whatsapp: editStoreForm.whatsapp,
+        category: editStoreForm.category || null,
+        openingTime: editStoreForm.openingTime || null,
+        closingTime: editStoreForm.closingTime || null,
+      })
+      .eq('id', storeData.id) // Tentukan toko mana yang di-update
+      .select()
+      .single();
 
-    setStoreData(updatedStore);
-    saveStoreToLocalStorage(updatedStore);
-    setShowEditStoreModal(false);
+    if (error) {
+      alert(`Gagal memperbarui toko: ${error.message}`);
+    } else if (updatedStore) {
+      // Update state React secara lokal
+      setStoreData(updatedStore as Store);
+      setShowEditStoreModal(false);
+    }
   };
 
-  // Save products to localStorage
-  const saveProductsToLocalStorage = (productList: Product[]) => {
-    if (!storeData) return;
-    
-    // Get existing seller products from localStorage
-    const existingProducts = JSON.parse(
-      localStorage.getItem("seller_products") || "{}"
+  // DIHAPUS: Fungsi helper localStorage sudah tidak diperlukan lagi
+  // const saveProductsToLocalStorage = ... (HAPUS)
+  // const saveStoreToLocalStorage = ... (HAPUS)
+
+
+  // BARU: Tambahkan UI untuk loading state
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-green-50 to-white flex flex-col justify-center items-center">
+        <Loader2 className="w-16 h-16 text-green-600 animate-spin" />
+        <p className="text-xl font-semibold text-gray-700 mt-4">
+          Memuat Dashboard...
+        </p>
+      </main>
     );
-    
-    // Update products for this store
-    existingProducts[storeData.id] = productList;
-    
-    // Save back to localStorage
-    localStorage.setItem("seller_products", JSON.stringify(existingProducts));
-  };
+  }
 
-  // Save store info to localStorage
-  const saveStoreToLocalStorage = (store: Store) => {
-    const existingStores = JSON.parse(
-      localStorage.getItem("seller_stores") || "{}"
+  // BARU: Handle jika penjual belum punya toko
+  if (!storeData && !isLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-green-50 to-white flex flex-col justify-center items-center text-center p-4">
+        <Package className="w-20 h-20 text-red-500 mb-4" />
+        <h1 className="text-3xl font-bold text-gray-800">Toko Tidak Ditemukan</h1>
+        <p className="text-lg text-gray-600 mt-2">
+          Akun penjual Anda belum terhubung dengan toko manapun.
+        </p>
+        <p className="text-gray-500 mt-1">
+          (Jika Anda baru mendaftar, toko default Anda mungkin sedang dibuat. Coba muat ulang.)
+        </p>
+      </main>
     );
-    
-    existingStores[store.id] = store;
-    localStorage.setItem("seller_stores", JSON.stringify(existingStores));
-  };
-
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-green-50 to-white">
@@ -263,42 +328,38 @@ export const DashboardSeller: React.FC = () => {
         <div className="flex flex-wrap gap-2 mb-10 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
-              activeTab === "overview"
-                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
-                : "text-gray-600 hover:text-green-600"
-            }`}
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${activeTab === "overview"
+              ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+              : "text-gray-600 hover:text-green-600"
+              }`}
           >
             Ringkasan
           </button>
           <button
             onClick={() => setActiveTab("products")}
-            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
-              activeTab === "products"
-                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
-                : "text-gray-600 hover:text-green-600"
-            }`}
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${activeTab === "products"
+              ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+              : "text-gray-600 hover:text-green-600"
+              }`}
           >
             Produk
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
-            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
-              activeTab === "reviews"
-                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
-                : "text-gray-600 hover:text-green-600"
-            }`}
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${activeTab === "reviews"
+              ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+              : "text-gray-600 hover:text-green-600"
+              }`}
           >
             <MessageSquare size={16} className="inline mr-1" />
             Review
           </button>
           <button
             onClick={() => setActiveTab("store")}
-            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
-              activeTab === "store"
-                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
-                : "text-gray-600 hover:text-green-600"
-            }`}
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${activeTab === "store"
+              ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+              : "text-gray-600 hover:text-green-600"
+              }`}
           >
             Info Toko
           </button>
@@ -508,7 +569,7 @@ export const DashboardSeller: React.FC = () => {
                         <button
                           onClick={() => {
                             if (responseText[review.id]?.trim()) {
-                              setReviews(reviews.map(r => 
+                              setReviews(reviews.map(r =>
                                 r.id === review.id ? { ...r, response: responseText[review.id] } : r
                               ));
                               setResponseText({ ...responseText, [review.id]: "" });
@@ -530,7 +591,7 @@ export const DashboardSeller: React.FC = () => {
         )}
 
         {/* Store Info Tab */}
-        {activeTab === "store" && (
+        {activeTab === "store" && storeData && ( // Pastikan storeData ada
           <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">
@@ -613,7 +674,7 @@ export const DashboardSeller: React.FC = () => {
       {/* Add/Edit Product Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-gradient-to-r from-yellow-400 to-green-500 text-white p-6 flex justify-between items-center">
               <h3 className="text-2xl font-bold">
                 {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
@@ -645,10 +706,11 @@ export const DashboardSeller: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="productCategory" className="block text-sm font-semibold text-gray-700 mb-2">
                     Kategori
                   </label>
                   <select
+                    id="productCategory"
                     value={newProduct.category}
                     onChange={(e) =>
                       setNewProduct({ ...newProduct, category: e.target.value })
@@ -706,7 +768,7 @@ export const DashboardSeller: React.FC = () => {
                       ((Number.parseFloat(newProduct.originalPrice) -
                         Number.parseFloat(newProduct.price)) /
                         Number.parseFloat(newProduct.originalPrice)) *
-                        100
+                      100
                     )}
                     %
                   </p>
@@ -816,10 +878,11 @@ export const DashboardSeller: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="storeCategory" className="block text-sm font-semibold text-gray-700 mb-2">
                   Kategori Toko
                 </label>
                 <select
+                  id="storeCategory" 
                   value={editStoreForm.category}
                   onChange={(e) =>
                     setEditStoreForm({ ...editStoreForm, category: e.target.value })
@@ -888,10 +951,11 @@ export const DashboardSeller: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="openingTime" className="block text-sm font-semibold text-gray-700 mb-2">
                     Jam Buka
                   </label>
                   <input
+                    id="openingTime" 
                     type="time"
                     value={editStoreForm.openingTime}
                     onChange={(e) =>
@@ -902,10 +966,11 @@ export const DashboardSeller: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="closingTime" className="block text-sm font-semibold text-gray-700 mb-2">
                     Jam Tutup
                   </label>
                   <input
+                    id="closingTime" 
                     type="time"
                     value={editStoreForm.closingTime}
                     onChange={(e) =>

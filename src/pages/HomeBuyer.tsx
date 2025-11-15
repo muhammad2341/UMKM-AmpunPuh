@@ -224,7 +224,7 @@ export const HomeBuyer: React.FC = () => {
             {filteredStores.length > 8 && !showAllStores && (
               <button
                 onClick={() => setShowAllStores(true)}
-                className="hidden md:flex items-center gap-2 px-6 py-3 glass rounded-xl font-bold text-slate-700 hover-lift hover-glow transition-all group"
+                className="hidden md:flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold hover-lift hover-glow transition-all duration-300 group"
               >
                 <span>Lihat Semua</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />

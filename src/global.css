@@ -2,85 +2,270 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== FUTURISTIC THEME ===== */
+
 :root {
-  /* Updated theme colors for vibrant UMKM with yellow-green gradient */
-  --background: oklch(0.98 0.01 70);
-  --foreground: oklch(0.2 0.02 30);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 30);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 30);
-  --primary: oklch(0.42 0.18 110);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.85 0.15 90);
-  --secondary-foreground: oklch(0.2 0.02 30);
-  --muted: oklch(0.92 0.02 80);
-  --muted-foreground: oklch(0.5 0.05 90);
-  --accent: oklch(0.68 0.16 130);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.977 0.017 60);
-  --border: oklch(0.92 0.02 80);
-  --input: oklch(0.97 0.01 80);
-  --ring: oklch(0.68 0.16 130);
-  --chart-1: oklch(0.68 0.16 130);
-  --chart-2: oklch(0.85 0.15 90);
-  --chart-3: oklch(0.42 0.18 110);
-  --chart-4: oklch(0.75 0.12 100);
-  --chart-5: oklch(0.6 0.14 120);
-  --radius: 0.625rem;
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.2 0.02 30);
-  --sidebar-primary: oklch(0.42 0.18 110);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.68 0.16 130);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.92 0.02 80);
-  --sidebar-ring: oklch(0.68 0.16 130);
+  /* Luxury White Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-pink: #ec4899;
+  --shadow-luxury: 0 20px 60px rgba(0, 0, 0, 0.08);
+  --glow-soft: 0 0 30px rgba(102, 126, 234, 0.3);
 }
 
-.dark {
-  --background: oklch(0.15 0.01 30);
-  --foreground: oklch(0.95 0.01 80);
-  --card: oklch(0.22 0.02 25);
-  --card-foreground: oklch(0.95 0.01 80);
-  --popover: oklch(0.22 0.02 25);
-  --popover-foreground: oklch(0.95 0.01 80);
-  --primary: oklch(0.68 0.16 130);
-  --primary-foreground: oklch(0.15 0.01 30);
-  --secondary: oklch(0.85 0.15 90);
-  --secondary-foreground: oklch(0.15 0.01 30);
-  --muted: oklch(0.35 0.03 25);
-  --muted-foreground: oklch(0.7 0.05 80);
-  --accent: oklch(0.85 0.15 90);
-  --accent-foreground: oklch(0.15 0.01 30);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.35 0.03 25);
-  --input: oklch(0.3 0.02 25);
-  --ring: oklch(0.68 0.16 130);
-  --chart-1: oklch(0.68 0.16 130);
-  --chart-2: oklch(0.85 0.15 90);
-  --chart-3: oklch(0.75 0.12 100);
-  --chart-4: oklch(0.42 0.18 110);
-  --chart-5: oklch(0.6 0.14 120);
-  --sidebar: oklch(0.2 0.01 25);
-  --sidebar-foreground: oklch(0.95 0.01 80);
-  --sidebar-primary: oklch(0.68 0.16 130);
-  --sidebar-primary-foreground: oklch(0.95 0.01 80);
-  --sidebar-accent: oklch(0.85 0.15 90);
-  --sidebar-accent-foreground: oklch(0.15 0.01 30);
-  --sidebar-border: oklch(0.35 0.03 25);
-  --sidebar-ring: oklch(0.68 0.16 130);
+/* Smooth scrolling */
+* {
+  scroll-behavior: smooth;
 }
 
-/* Removed unsupported @theme inline to avoid PostCSS errors */
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
+  background-attachment: fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+/* ===== GLASSMORPHISM ===== */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-luxury);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
   }
-  body {
-    @apply bg-background text-foreground;
+  50% { 
+    box-shadow: 0 0 40px rgba(102, 126, 234, 0.6);
   }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rotate-gradient {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
+}
+
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  position: relative;
+  border-radius: 1rem;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: var(--accent-gradient);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* ===== HOVER EFFECTS ===== */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: var(--glow-soft);
+}
+
+/* ===== BUTTONS ===== */
+.btn-futuristic {
+  position: relative;
+  padding: 1rem 2rem;
+  background: var(--accent-gradient);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-futuristic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-futuristic:hover::before {
+  left: 100%;
+}
+
+.btn-futuristic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+}
+
+/* ===== CARDS ===== */
+.card-futuristic {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.card-futuristic:hover {
+  transform: translateY(-10px) rotateX(2deg);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2, #667eea);
+}
+
+/* ===== LOADING SKELETON ===== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* ===== GRID BACKGROUND ===== */
+.grid-background {
+  background-image: 
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .card-futuristic:hover {
+    transform: translateY(-5px);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== SELECTION ===== */
+::selection {
+  background: rgba(102, 126, 234, 0.2);
+  color: var(--text-primary);
+}
+
+/* ===== FOCUS STYLES ===== */
+*:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+  border-radius: 4px;
 }

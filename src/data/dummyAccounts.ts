@@ -189,11 +189,22 @@ export const initializeDummyAccounts = () => {
   const existingUsers = localStorage.getItem("umkm_users");
   const users = existingUsers ? JSON.parse(existingUsers) : [];
   
-  // Add dummy accounts if they don't exist
+  // Upsert dummy accounts (ensure passwords/roles/current mapping stay consistent)
   dummyAccounts.forEach(account => {
-    const exists = users.some((u: any) => u.email === account.email);
-    if (!exists) {
+    const idx = users.findIndex((u: any) => u.email === account.email);
+    if (idx === -1) {
       users.push(account);
+    } else {
+      // Preserve id if present, but sync critical auth fields
+      const current = users[idx];
+      users[idx] = {
+        ...current,
+        ...account,
+        id: current?.id ?? account.id,
+        password: account.password, // enforce known test password
+        role: account.role,
+        storeId: (account as any).storeId,
+      };
     }
   });
   

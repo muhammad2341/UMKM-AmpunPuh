@@ -219,52 +219,55 @@ export const DashboardSeller: React.FC = () => {
     localStorage.setItem("seller_stores", JSON.stringify(existingStores));
   };
 
+
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gradient-to-br from-green-50 to-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-yellow-400 to-green-500 text-white py-8 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center space-x-2 mb-4 hover:text-yellow-100 transition"
-          >
-            <ChevronLeft size={20} />
-            <span>Kembali</span>
-          </button>
-          <h1 className="text-4xl font-bold">Dashboard Penjual</h1>
-          <p className="text-yellow-100">Kelola toko dan produk Anda</p>
+      <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white py-10 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4 mb-4 md:mb-0">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-semibold shadow transition"
+            >
+              <ChevronLeft size={20} />
+              <span>Kembali</span>
+            </button>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-lg">Dashboard Penjual</h1>
+          </div>
+          <div className="text-lg md:text-xl font-semibold text-white/90 drop-shadow">Kelola toko & produk Anda</div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-10">
         {/* Tab Navigation */}
-        <div className="flex space-x-4 mb-8 border-b-2 border-gray-200">
+        <div className="flex flex-wrap gap-2 mb-10 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "overview"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Ringkasan
           </button>
           <button
             onClick={() => setActiveTab("products")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "products"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Produk
           </button>
           <button
             onClick={() => setActiveTab("store")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "store"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Info Toko
@@ -273,26 +276,21 @@ export const DashboardSeller: React.FC = () => {
 
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Total Produk
-              </div>
-              <div className="text-4xl font-bold text-green-600">
-                {products.length}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-green-500">
+              <div className="text-gray-500 text-sm font-semibold mb-2">Total Produk</div>
+              <div className="text-5xl font-extrabold text-green-600 mb-1">{products.length}</div>
+              <div className="text-xs text-gray-400">Produk aktif di toko Anda</div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Penjualan
-              </div>
-              <div className="text-4xl font-bold text-blue-600">Rp 1.2jt</div>
+            <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-500">
+              <div className="text-gray-500 text-sm font-semibold mb-2">Penjualan (dummy)</div>
+              <div className="text-5xl font-extrabold text-blue-600 mb-1">Rp 1.2jt</div>
+              <div className="text-xs text-gray-400">Estimasi bulan ini</div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Rating Toko
-              </div>
-              <div className="text-4xl font-bold text-yellow-500">4.8 ⭐</div>
+            <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-yellow-400">
+              <div className="text-gray-500 text-sm font-semibold mb-2">Rating Toko</div>
+              <div className="text-5xl font-extrabold text-yellow-500 mb-1">4.8 <span className="text-3xl">⭐</span></div>
+              <div className="text-xs text-gray-400">Dari pembeli</div>
             </div>
           </div>
         )}

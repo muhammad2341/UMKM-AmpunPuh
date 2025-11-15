@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, MapPin, Store as StoreIcon, Star, ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Carousel } from "../components/Carousel";
 import { ProductCard } from "../components/ProductCard";
+import { StoreCard } from "../components/StoreCard";
 import { categories, products as dummyProducts, advertisementBanners, stores } from "../data/dummy";
 import type { Product, Store } from "../types";
 
@@ -134,8 +135,8 @@ export const HomeBuyer: React.FC = () => {
           <button
             onClick={() => setSelectedCategory("")}
             className={`group relative p-6 rounded-2xl transition-all duration-300 ${selectedCategory === ""
-                ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
-                : "glass hover:scale-105"
+              ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
+              : "glass hover:scale-105"
               }`}
           >
             <div className="flex flex-col items-center space-y-2">
@@ -156,8 +157,8 @@ export const HomeBuyer: React.FC = () => {
               key={cat.id}
               onClick={() => setSelectedCategory(cat.name)}
               className={`group relative p-6 rounded-2xl transition-all duration-300 ${selectedCategory === cat.name
-                  ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
-                  : "glass hover:scale-105"
+                ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
+                : "glass hover:scale-105"
                 }`}
             >
               <div className="flex flex-col items-center space-y-2">
@@ -205,65 +206,44 @@ export const HomeBuyer: React.FC = () => {
       {/* Featured Stores Section */}
       <section className="relative py-12 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+          {/* Section Header dengan Dekorasi */}
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
-              <StoreIcon className="w-8 h-8 text-purple-500" />
-              Toko Pilihan
-            </h2>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-purple-500 rounded-2xl blur-xl opacity-30"></div>
+                <div className="relative w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                  <StoreIcon className="w-7 h-7 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-3xl font-black gradient-text">Toko Pilihan</h2>
+                <p className="text-slate-600">Jelajahi UMKM terbaik di sekitar Anda</p>
+              </div>
+            </div>
+
+            {filteredStores.length > 8 && !showAllStores && (
+              <button
+                onClick={() => setShowAllStores(true)}
+                className="hidden md:flex items-center gap-2 px-6 py-3 glass rounded-xl font-bold text-slate-700 hover-lift hover-glow transition-all group"
+              >
+                <span>Lihat Semua</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </button>
+            )}
           </div>
 
           {filteredStores.length > 0 ? (
             <>
+              {/* Store Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {(showAllStores ? filteredStores : filteredStores.slice(0, 8)).map((store, idx) => (
-                  <Link
-                    key={store.id}
-                    to={`/store/${store.id}`}
-                    className="card-futuristic overflow-hidden animate-scale-in"
-                    style={{ animationDelay: `${idx * 0.05}s` }}
-                  >
-                    <div className="relative overflow-hidden h-48 bg-gradient-to-br from-slate-100 to-slate-50">
-                      <div className="absolute inset-0 grid-background opacity-20"></div>
-                      <img
-                        src={store.image}
-                        alt={store.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      {store.category && (
-                        <div className="absolute top-3 right-3 glass px-3 py-1 rounded-full">
-                          <span className="text-xs font-bold text-blue-600">{store.category}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5 space-y-3">
-                      <h3 className="font-bold text-slate-800 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
-                        {store.name}
-                      </h3>
-                      <p className="text-sm text-slate-600 line-clamp-2">{store.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${i < Math.floor(store.rating)
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "text-slate-200"
-                                }`}
-                            />
-                          ))}
-                          <span className="text-sm font-bold text-slate-700 ml-1">{store.rating}</span>
-                        </div>
-                        <span className="text-xs text-slate-500 font-semibold">
-                          {store.products?.length || 0} Produk
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+                  <StoreCard key={store.id} store={store} index={idx} />
                 ))}
               </div>
 
+              {/* Show All Button - Mobile */}
               {!showAllStores && filteredStores.length > 8 && (
-                <div className="mt-10 flex justify-center">
+                <div className="mt-10 flex justify-center md:hidden">
                   <button
                     onClick={() => setShowAllStores(true)}
                     className="inline-flex items-center gap-3 px-8 py-4 glass rounded-2xl font-bold text-slate-700 hover-lift hover-glow transition-all group"
@@ -273,6 +253,30 @@ export const HomeBuyer: React.FC = () => {
                   </button>
                 </div>
               )}
+
+              {/* Stats Bar */}
+              <div className="mt-12 p-6 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl border-2 border-blue-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <div>
+                    <p className="text-4xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      {filteredStores.length}+
+                    </p>
+                    <p className="text-sm font-semibold text-slate-600 mt-1">Toko Terdaftar</p>
+                  </div>
+                  <div>
+                    <p className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {allProducts.length}+
+                    </p>
+                    <p className="text-sm font-semibold text-slate-600 mt-1">Produk Tersedia</p>
+                  </div>
+                  <div>
+                    <p className="text-4xl font-black bg-gradient-to-r from-pink-600 to-orange-600 bg-clip-text text-transparent">
+                      4.8⭐
+                    </p>
+                    <p className="text-sm font-semibold text-slate-600 mt-1">Rating Rata-rata</p>
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
             <div className="text-center py-20 glass rounded-3xl">

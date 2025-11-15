@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
               🏪
             </div>
             <span className="text-white font-bold text-xl drop-shadow-lg group-hover:scale-105 transition-transform">
-              UMKM Hub
+              Laris Manis
             </span>
           </Link>
 

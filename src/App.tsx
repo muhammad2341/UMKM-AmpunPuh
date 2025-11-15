@@ -7,6 +7,7 @@ import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { HomeBuyer } from "./pages/HomeBuyer";
+import LandingPage from "./pages/LandingPage";
 import { ProductDetail } from "./pages/ProductDetail";
 import { StoreDetail } from "./pages/StoreDetail";
 import { DashboardSeller } from "./pages/DashboardSeller";
@@ -27,8 +28,8 @@ function App() {
       if (isBuyer) return <Navigate to="/home" replace />;
       if (isSeller) return <Navigate to="/dashboard-seller" replace />;
     }
-    // Default root shows HomeBuyer content
-    return <HomeBuyer />;
+    // Default root shows Landing Page
+    return <LandingPage />;
   };
 
   return (

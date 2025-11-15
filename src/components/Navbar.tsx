@@ -86,20 +86,19 @@ export const Navbar: React.FC = () => {
           >
             <div className="flex items-center space-x-2 whitespace-nowrap">
               <Sparkles className="w-6 h-6" />
-              <span>UMKMSurabaya</span>
+              <span>LARISMANIS</span>
             </div>
           </Link>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-2">
-            <NavLink to="/" icon={<Home size={18} />} text="Beranda" />
 
             {isAuthenticated && isBuyer && (
               <>
                 <NavLink
                   to="/home"
-                  icon={<LayoutGrid size={18} />}
-                  text="Produk"
+                  icon={<Home size={18} />}
+                  text="Beranda"
                 />
                 <NavLink to="/maps" icon={<Map size={18} />} text="Peta Toko" />
               </>
@@ -120,7 +119,7 @@ export const Navbar: React.FC = () => {
                 {isBuyer && (
                   <Link
                     to="/favorites"
-                    className="relative p-2 rounded-lg text-slate-400 hover:text-red-500 transition-all duration-300 hover:-translate-y-0.5"
+                    className="relative p-2 rounded-lg text-white transition-all duration-300 hover:-translate-y-0.5 hover:text-white hover:bg-white/20 hover:shadow-lg"
                     title="Favorit"
                   >
                     <Heart size={20} />
@@ -132,16 +131,16 @@ export const Navbar: React.FC = () => {
                   </Link>
                 )}
 
-                <div className="px-3 py-2 rounded-lg bg-gray-900 text-white">
+                <div className="px-3 py-2 rounded-lg text-white bg-white/20 shadow-lg">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center">
                       <User size={16} className="text-white" />
                     </div>
                     <div>
                       <p className="text-white text-sm font-bold leading-tight">
                         {user.name}
                       </p>
-                      <p className="text-gray-400 text-xs flex items-center gap-1">
+                      <p className="text-white/70 text-xs flex items-center gap-1">
                         {user.role === "buyer" ? (
                           <ShoppingBag size={12} />
                         ) : (
@@ -155,7 +154,7 @@ export const Navbar: React.FC = () => {
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-400 hover:text-red-500 transition-all duration-300 hover:-translate-y-0.5"
+                  className="relative p-2 rounded-lg text-white transition-all duration-300 hover:-translate-y-0.5 hover:text-white hover:bg-white/20 hover:shadow-lg"
                   title="Keluar"
                 >
                   <LogOut size={18} />
@@ -165,14 +164,12 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
-                >
+                    className="relative p-2 rounded-lg text-white bg-transparent transition-all duration-300 hover:-translate-y-0.5 hover:text-white hover:bg-white/20 hover:shadow-lg">
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
+                    className="relative px-4 py-2 rounded-lg text-white bg-transparent font-medium transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg">
                   Daftar
                 </Link>
               </div>
@@ -220,12 +217,6 @@ export const Navbar: React.FC = () => {
 
               {isAuthenticated && isBuyer && (
                 <>
-                  <MobileNavLink
-                    to="/home"
-                    icon={<LayoutGrid size={20} />}
-                    text="Produk"
-                    onClick={() => setIsOpen(false)}
-                  />
                   <MobileNavLink
                     to="/maps"
                     icon={<Map size={20} />}

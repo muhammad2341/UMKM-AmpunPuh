@@ -7,6 +7,14 @@ export interface SizeChart {
   shoulder?: string;
 }
 
+export interface NutritionInfo {
+  calories: number;
+  protein?: string;
+  carbs?: string;
+  fat?: string;
+  fiber?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -20,6 +28,7 @@ export interface Product {
   storeName: string;
   description: string;
   ingredients?: string[];
+  nutritionInfo?: NutritionInfo;
   stock?: number;
   isAvailable?: boolean;
   availableSizes?: string[];

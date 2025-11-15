@@ -1,3 +1,12 @@
+export interface SizeChart {
+  size: string;
+  chest?: string;
+  waist?: string;
+  hips?: string;
+  length?: string;
+  shoulder?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -11,6 +20,10 @@ export interface Product {
   storeName: string;
   description: string;
   ingredients?: string[];
+  stock?: number;
+  isAvailable?: boolean;
+  availableSizes?: string[];
+  sizeChart?: SizeChart[];
 }
 
 export interface Store {
@@ -18,11 +31,16 @@ export interface Store {
   name: string;
   image: string;
   description: string;
+  category?: string;
   address: string;
   whatsapp: string;
   mapUrl: string;
+  lat?: number;
+  lng?: number;
   rating: number;
   products: Product[];
+  openingTime?: string;
+  closingTime?: string;
 }
 
 export interface User {

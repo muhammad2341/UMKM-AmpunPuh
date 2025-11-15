@@ -1,25 +1,49 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import {
-  Heart,
-  ShoppingCart,
-  MapPin,
-  Phone,
-  Star,
-  ChevronLeft,
-} from "lucide-react";
-import { products } from "../data/dummy";
+import { Heart, MapPin, Phone, Star, ChevronLeft, Ruler, X } from "lucide-react";
+import { products as dummyProducts, stores } from "../data/dummy";
+import { useCart } from "../contexts/CartContext";
+import { useAuth } from "../contexts/AuthContext";
+import type { Product } from "../types";
 
 export const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, addToFavorites, removeFromFavorites } = useCart();
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
+  const [showSizeModal, setShowSizeModal] = useState(false);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
 
-  const product = products.find((p) => p.id === id);
+  // Load product from localStorage or dummy data
+  useEffect(() => {
+    const savedProducts = JSON.parse(localStorage.getItem("seller_products") || "{}");
+    
+    // Collect all seller products
+    const sellerProducts: Product[] = [];
+    Object.keys(savedProducts).forEach((storeId) => {
+      sellerProducts.push(...savedProducts[storeId]);
+    });
+
+    // Merge with dummy products
+    const allProducts = [...dummyProducts];
+    sellerProducts.forEach((sellerProduct) => {
+      const existingIndex = allProducts.findIndex((p) => p.id === sellerProduct.id);
+      if (existingIndex >= 0) {
+        allProducts[existingIndex] = sellerProduct;
+      } else {
+        allProducts.push(sellerProduct);
+      }
+    });
+
+    const foundProduct = allProducts.find((p) => p.id === id);
+    setProduct(foundProduct || null);
+  }, [id]);
 
   if (!product) {
     return (
@@ -42,6 +66,19 @@ export const ProductDetail: React.FC = () => {
         ((product.originalPrice - product.price) / product.originalPrice) * 100
       )
     : 0;
+
+  const openWhatsApp = (withSize: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    const store = stores.find((s) => s.id === product.storeId);
+    const rawNumber = store?.whatsapp || "";
+    const phone = rawNumber.replace(/[^0-9]/g, "");
+    const sizeInfo = withSize && selectedSize ? `, Ukuran: ${selectedSize}` : "";
+    const msg = `Halo, saya ingin pesan ${product.name} (${quantity} pcs${sizeInfo}) dari toko ${store?.name}. Apakah tersedia?`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+    setTimeout(() => setIsProcessing(false), 400);
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -185,20 +222,143 @@ export const ProductDetail: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex space-x-4">
               <button
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={() => {
+                  if (!user) {
+                    alert("Silakan login terlebih dahulu!");
+                    navigate("/login");
+                    return;
+                  }
+                  if (isFavorite(product.id)) {
+                    removeFromFavorites(product.id);
+                  } else {
+                    addToFavorites(product);
+                  }
+                }}
                 className="flex-1 flex items-center justify-center space-x-2 py-3 border-2 border-gray-300 rounded-lg hover:border-red-500 transition font-semibold text-gray-700 hover:text-red-500"
               >
                 <Heart
                   size={20}
-                  className={isFavorite ? "fill-current text-red-500" : ""}
+                  className={isFavorite(product.id) ? "fill-current text-red-500" : ""}
                 />
-                <span>{isFavorite ? "Hapus Favorit" : "Tambah Favorit"}</span>
+                <span>{isFavorite(product.id) ? "Hapus Simpanan" : "Simpan Dulu!"}</span>
               </button>
-              <button className="flex-1 flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-yellow-400 to-green-500 text-white rounded-lg hover:shadow-lg transition font-semibold">
-                <ShoppingCart size={20} />
-                <span>Keranjang</span>
+              
+              <button
+                onClick={() => {
+                  if (!user) {
+                    alert("Silakan login terlebih dahulu!");
+                    navigate("/login");
+                    return;
+                  }
+                  if (product.category === "Fashion" && product.availableSizes && product.availableSizes.length > 0) {
+                    setShowSizeModal(true);
+                  } else {
+                    openWhatsApp(false);
+                  }
+                }}
+                className="flex-1 flex items-center justify-center space-x-2 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+                disabled={isProcessing}
+              >
+                <Phone size={20} />
+                <span>WhatsApp</span>
               </button>
             </div>
+
+            {/* Size Selection Modal */}
+            {showSizeModal && product.availableSizes && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-gray-900">Pilih Ukuran</h3>
+                    <button
+                      onClick={() => {
+                        setShowSizeModal(false);
+                        setSelectedSize("");
+                      }}
+                      className="p-1 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  {/* Size Buttons */}
+                  <div className="grid grid-cols-4 gap-3 mb-4">
+                    {product.availableSizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`py-3 px-4 font-bold rounded-lg border-2 transition ${
+                          selectedSize === size
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-blue-500"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Size Chart */}
+                  {product.sizeChart && product.sizeChart.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                        <Ruler size={18} />
+                        Panduan Ukuran (cm)
+                      </h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-gray-300 px-2 py-1">Ukuran</th>
+                              {product.sizeChart[0].chest && <th className="border border-gray-300 px-2 py-1">Dada</th>}
+                              {product.sizeChart[0].waist && <th className="border border-gray-300 px-2 py-1">Pinggang</th>}
+                              {product.sizeChart[0].hips && <th className="border border-gray-300 px-2 py-1">Pinggul</th>}
+                              {product.sizeChart[0].length && <th className="border border-gray-300 px-2 py-1">Panjang</th>}
+                              {product.sizeChart[0].shoulder && <th className="border border-gray-300 px-2 py-1">Bahu</th>}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {product.sizeChart.map((chart) => (
+                              <tr key={chart.size}>
+                                <td className="border border-gray-300 px-2 py-1 font-semibold text-center">{chart.size}</td>
+                                {chart.chest && <td className="border border-gray-300 px-2 py-1 text-center">{chart.chest}</td>}
+                                {chart.waist && <td className="border border-gray-300 px-2 py-1 text-center">{chart.waist}</td>}
+                                {chart.hips && <td className="border border-gray-300 px-2 py-1 text-center">{chart.hips}</td>}
+                                {chart.length && <td className="border border-gray-300 px-2 py-1 text-center">{chart.length}</td>}
+                                {chart.shoulder && <td className="border border-gray-300 px-2 py-1 text-center">{chart.shoulder}</td>}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tips */}
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-blue-900">
+                      💡 <strong>Tips:</strong> Ukur badan Anda dan cocokkan dengan tabel ukuran di atas untuk hasil terbaik.
+                    </p>
+                  </div>
+
+                  {/* Confirm Button - open WhatsApp with size */}
+                  <button
+                    onClick={() => {
+                      if (!selectedSize) {
+                        alert("Pilih ukuran terlebih dahulu!");
+                        return;
+                      }
+                      openWhatsApp(true);
+                      setShowSizeModal(false);
+                      setSelectedSize("");
+                    }}
+                    className="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
+                  >
+                    WhatsApp
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Store Section */}
             <div className="bg-gradient-to-r from-yellow-50 to-green-50 p-6 rounded-xl border-2 border-yellow-200">

@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Edit2, Trash2, ChevronLeft, MapPin, Phone, Tag, Package } from "lucide-react";
+import { Plus, Edit2, Trash2, ChevronLeft, MapPin, Phone, Tag, Package, TrendingUp, BarChart3, MessageSquare, Star, Send } from "lucide-react";
 import type { Product, Store } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import { stores as dummyStores, products as dummyProducts } from "../data/dummy";
@@ -11,7 +11,7 @@ import { stores as dummyStores, products as dummyProducts } from "../data/dummy"
 export const DashboardSeller: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"overview" | "products" | "store">(
+  const [activeTab, setActiveTab] = useState<"overview" | "products" | "store" | "reviews">(
     "overview"
   );
   const [showAddModal, setShowAddModal] = useState(false);
@@ -40,6 +40,25 @@ export const DashboardSeller: React.FC = () => {
     openingTime: "",
     closingTime: "",
   });
+
+  // Dummy reviews data (in real app, fetch from backend)
+  const [reviews, setReviews] = useState([
+    { id: "1", customerName: "Budi Santoso", rating: 5, comment: "Produk sangat bagus, pengiriman cepat!", date: "2024-11-10", response: "" },
+    { id: "2", customerName: "Siti Aminah", rating: 4, comment: "Kualitas oke, harga terjangkau.", date: "2024-11-12", response: "Terima kasih atas reviewnya!" },
+    { id: "3", customerName: "Ahmad Rizki", rating: 5, comment: "Pelayanan ramah, barang sesuai ekspektasi.", date: "2024-11-14", response: "" },
+  ]);
+  const [responseText, setResponseText] = useState<{[key: string]: string}>({});
+
+  // Dummy sales data for chart
+  const salesData = [
+    { month: "Jan", sales: 1200000 },
+    { month: "Feb", sales: 1500000 },
+    { month: "Mar", sales: 1100000 },
+    { month: "Apr", sales: 1800000 },
+    { month: "Mei", sales: 2200000 },
+    { month: "Jun", sales: 1900000 },
+  ];
+  const maxSales = Math.max(...salesData.map(d => d.sales));
 
   // Load store and products based on logged-in seller
   useEffect(() => {
@@ -219,52 +238,66 @@ export const DashboardSeller: React.FC = () => {
     localStorage.setItem("seller_stores", JSON.stringify(existingStores));
   };
 
+
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gradient-to-br from-green-50 to-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-yellow-400 to-green-500 text-white py-8 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center space-x-2 mb-4 hover:text-yellow-100 transition"
-          >
-            <ChevronLeft size={20} />
-            <span>Kembali</span>
-          </button>
-          <h1 className="text-4xl font-bold">Dashboard Penjual</h1>
-          <p className="text-yellow-100">Kelola toko dan produk Anda</p>
+      <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white py-10 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4 mb-4 md:mb-0">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-semibold shadow transition"
+            >
+              <ChevronLeft size={20} />
+              <span>Kembali</span>
+            </button>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-lg">Dashboard Penjual</h1>
+          </div>
+          <div className="text-lg md:text-xl font-semibold text-white/90 drop-shadow">Kelola toko & produk Anda</div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-10">
         {/* Tab Navigation */}
-        <div className="flex space-x-4 mb-8 border-b-2 border-gray-200">
+        <div className="flex flex-wrap gap-2 mb-10 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "overview"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Ringkasan
           </button>
           <button
             onClick={() => setActiveTab("products")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "products"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Produk
           </button>
           <button
+            onClick={() => setActiveTab("reviews")}
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
+              activeTab === "reviews"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
+            }`}
+          >
+            <MessageSquare size={16} className="inline mr-1" />
+            Review
+          </button>
+          <button
             onClick={() => setActiveTab("store")}
-            className={`pb-3 px-4 font-semibold transition ${
+            className={`pb-3 px-6 font-semibold rounded-t-lg transition-all duration-150 ${
               activeTab === "store"
-                ? "border-b-4 border-green-600 text-green-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white border-x border-t border-b-0 border-green-500 text-green-700 shadow-sm -mb-px"
+                : "text-gray-600 hover:text-green-600"
             }`}
           >
             Info Toko
@@ -273,26 +306,53 @@ export const DashboardSeller: React.FC = () => {
 
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Total Produk
+          <div className="space-y-8">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-green-500">
+                <div className="text-gray-500 text-sm font-semibold mb-2">Total Produk</div>
+                <div className="text-5xl font-extrabold text-green-600 mb-1">{products.length}</div>
+                <div className="text-xs text-gray-400">Produk aktif di toko Anda</div>
               </div>
-              <div className="text-4xl font-bold text-green-600">
-                {products.length}
+              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-500">
+                <div className="text-gray-500 text-sm font-semibold mb-2">Penjualan (dummy)</div>
+                <div className="text-5xl font-extrabold text-blue-600 mb-1">Rp 1.2jt</div>
+                <div className="text-xs text-gray-400">Estimasi bulan ini</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-yellow-400">
+                <div className="text-gray-500 text-sm font-semibold mb-2">Rating Toko</div>
+                <div className="text-5xl font-extrabold text-yellow-500 mb-1">4.8 <span className="text-3xl">⭐</span></div>
+                <div className="text-xs text-gray-400">Dari pembeli</div>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Penjualan
+
+            {/* Sales Chart */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="flex items-center gap-2 mb-6">
+                <BarChart3 className="text-blue-600" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Grafik Penjualan 6 Bulan Terakhir</h3>
               </div>
-              <div className="text-4xl font-bold text-blue-600">Rp 1.2jt</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <div className="text-gray-500 text-sm font-semibold mb-2">
-                Rating Toko
+              <div className="space-y-4">
+                {salesData.map((data, idx) => (
+                  <div key={idx} className="flex items-center gap-4">
+                    <div className="w-16 text-sm font-semibold text-gray-600">{data.month}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-10 relative overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full flex items-center justify-end pr-4 transition-all duration-500"
+                        style={{ width: `${(data.sales / maxSales) * 100}%` }}
+                      >
+                        <span className="text-white text-sm font-bold">
+                          Rp {(data.sales / 1000000).toFixed(1)}jt
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-4xl font-bold text-yellow-500">4.8 ⭐</div>
+              <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
+                <TrendingUp size={16} className="text-green-600" />
+                <span>Trend penjualan meningkat 15% dari bulan lalu</span>
+              </div>
             </div>
           </div>
         )}
@@ -388,6 +448,84 @@ export const DashboardSeller: React.FC = () => {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Reviews Tab */}
+        {activeTab === "reviews" && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <MessageSquare className="text-green-600" size={28} />
+                Review Pelanggan
+              </h2>
+              <div className="text-sm text-gray-500">
+                Total {reviews.length} review
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-white rounded-xl shadow-md p-6 space-y-4">
+                  {/* Review Header */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-bold text-gray-900">{review.customerName}</h3>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={16}
+                            className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                          />
+                        ))}
+                        <span className="text-sm text-gray-500 ml-2">{review.rating}/5</span>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-400">{review.date}</span>
+                  </div>
+
+                  {/* Review Comment */}
+                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{review.comment}</p>
+
+                  {/* Seller Response */}
+                  {review.response ? (
+                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                      <div className="text-sm font-semibold text-blue-900 mb-1">Respon Anda:</div>
+                      <p className="text-gray-700">{review.response}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Balas Review:</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Tulis respon Anda..."
+                          value={responseText[review.id] || ""}
+                          onChange={(e) => setResponseText({ ...responseText, [review.id]: e.target.value })}
+                          className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
+                        />
+                        <button
+                          onClick={() => {
+                            if (responseText[review.id]?.trim()) {
+                              setReviews(reviews.map(r => 
+                                r.id === review.id ? { ...r, response: responseText[review.id] } : r
+                              ));
+                              setResponseText({ ...responseText, [review.id]: "" });
+                              alert("Respon berhasil dikirim!");
+                            }
+                          }}
+                          className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+                        >
+                          <Send size={16} />
+                          Kirim
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

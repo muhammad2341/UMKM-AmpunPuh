@@ -1,10 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { Navbar } from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
-import { LandingPage } from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { HomeBuyer } from "./pages/HomeBuyer";
@@ -13,6 +12,7 @@ import { StoreDetail } from "./pages/StoreDetail";
 import { DashboardSeller } from "./pages/DashboardSeller";
 import { Maps } from "./pages/Maps";
 import { Favorites } from "./pages/Favorites";
+import { useAuth } from "./contexts/AuthContext";
 import { initializeDummyAccounts } from "./data/dummyAccounts";
 // Orders removed
 
@@ -20,14 +20,25 @@ import { initializeDummyAccounts } from "./data/dummyAccounts";
 initializeDummyAccounts();
 
 function App() {
+  const Root: React.FC = () => {
+    const { isAuthenticated, isBuyer, isSeller } = useAuth();
+    // If logged in, send to the correct home
+    if (isAuthenticated) {
+      if (isBuyer) return <Navigate to="/home" replace />;
+      if (isSeller) return <Navigate to="/dashboard-seller" replace />;
+    }
+    // Default root shows HomeBuyer content
+    return <HomeBuyer />;
+  };
+
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
           <Navbar />
           <Routes>
-          {/* Public Routes - Only Landing Page */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Root: show HomeBuyer when not logged-in; redirect when logged-in */}
+          <Route path="/" element={<Root />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -59,9 +70,9 @@ function App() {
           <Route
             path="/maps"
             element={
-              <RoleProtectedRoute allowedRole="buyer">
+              <ProtectedRoute>
                 <Maps />
-              </RoleProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route

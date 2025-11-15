@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -29,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    setHydrated(true);
   }, []);
 
   const register = (name: string, email: string, phone: string, password: string, role: "buyer" | "seller"): boolean => {
@@ -136,6 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isBuyer: user?.role === "buyer",
         isSeller: user?.role === "seller",
+        // @ts-expect-error expose hydrated flag for route guards
+        hydrated,
       }}
     >
       {children}

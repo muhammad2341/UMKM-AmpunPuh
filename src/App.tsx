@@ -36,7 +36,8 @@ function App() {
       <CartProvider>
         <Router>
           <Navbar />
-          <Routes>
+          <main className="pt-20">
+            <Routes>
           {/* Root: show HomeBuyer when not logged-in; redirect when logged-in */}
           <Route path="/" element={<Root />} />
           <Route path="/login" element={<LoginPage />} />
@@ -103,7 +104,8 @@ function App() {
           />
           {/* Cart route removed - ordering via WhatsApp */}
           {/* Orders route removed */}
-        </Routes>
+            </Routes>
+          </main>
         </Router>
       </CartProvider>
     </AuthProvider>

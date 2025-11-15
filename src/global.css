@@ -87,6 +87,28 @@ body {
   100% { filter: hue-rotate(360deg); }
 }
 
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+@keyframes gradient-xy {
+  0%, 100% {
+    background-size: 400% 400%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 400% 400%;
+    background-position: right center;
+  }
+}
+
 /* ===== UTILITY CLASSES ===== */
 .animate-float {
   animation: float 6s ease-in-out infinite;
@@ -102,6 +124,14 @@ body {
 
 .animate-scale-in {
   animation: scale-in 0.4s ease-out forwards;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 15s ease infinite;
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 15s ease infinite;
 }
 
 .gradient-text {
@@ -187,6 +217,7 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .card-futuristic:hover {
@@ -268,4 +299,12 @@ body {
   outline: 2px solid #667eea;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ===== NAVBAR SPECIFIC ===== */
+nav .glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }

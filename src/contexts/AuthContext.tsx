@@ -1,18 +1,24 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../supabaseClient"; // Import klien Supabase kita
+import type { Session, User } from "@supabase/supabase-js";
 
-interface User {
+// Definisikan User App kita (termasuk role dari metadata)
+interface AppUser {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
+  email?: string;
   role: "buyer" | "seller";
+  // tambahkan data lain jika perlu
+  name: string; 
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, phone: string, password: string, role: "buyer" | "seller") => boolean;
-  logout: () => void;
+  user: AppUser | null;
+  session: Session | null;
+  // Fungsi login/register/logout sekarang diganti oleh Supabase
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, phone: string, password: string, role: "buyer" | "seller") => Promise<boolean>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isBuyer: boolean;
   isSeller: boolean;
@@ -21,117 +27,99 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem("umkm_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setHydrated(true);
+    // Cek sesi yang ada saat load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        const appUser = mapSupabaseUserToAppUser(session.user);
+        setUser(appUser);
+      }
+      setHydrated(true);
+    });
+
+    // Dengar perubahan status auth (login, logout)
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        const appUser = session?.user ? mapSupabaseUserToAppUser(session.user) : null;
+        setUser(appUser);
+      }
+    );
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
-  const register = (name: string, email: string, phone: string, password: string, role: "buyer" | "seller"): boolean => {
-    try {
-      // Trim whitespace from inputs
-      const trimmedEmail = email.trim().toLowerCase();
-      const trimmedPassword = password.trim();
-      const trimmedName = name.trim();
-      const trimmedPhone = phone.trim();
-
-      // Get existing users from localStorage
-      const usersData = localStorage.getItem("umkm_users");
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      // Check if email already exists
-      if (users.some((u: any) => u.email === trimmedEmail)) {
-        alert("Email sudah terdaftar!");
-        return false;
-      }
-
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
-        name: trimmedName,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        password: trimmedPassword, // In production, this should be hashed!
-        role,
-      };
-
-      console.log("✅ Register success:", { email: trimmedEmail, role });
-
-      // Save to users list
-      users.push(newUser);
-      localStorage.setItem("umkm_users", JSON.stringify(users));
-
-      // Auto login after register
-      const userWithoutPassword = { id: newUser.id, name: trimmedName, email: trimmedEmail, phone: trimmedPhone, role };
-      setUser(userWithoutPassword);
-      localStorage.setItem("umkm_user", JSON.stringify(userWithoutPassword));
-
-      return true;
-    } catch (error) {
-      console.error("Register error:", error);
-      return false;
-    }
+  const mapSupabaseUserToAppUser = (supabaseUser: User): AppUser => {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      role: supabaseUser.user_metadata?.role || 'buyer',
+      name: supabaseUser.user_metadata?.name || 'User'
+    };
   };
 
-  const login = (email: string, password: string): boolean => {
-    try {
-      // Trim whitespace from inputs
-      const trimmedEmail = email.trim().toLowerCase();
-      const trimmedPassword = password.trim();
-
-      // Get users from localStorage
-      const usersData = localStorage.getItem("umkm_users");
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      console.log("🔍 Login attempt:", { email: trimmedEmail });
-      console.log("📋 Available users:", users.map((u: any) => ({ email: u.email, role: u.role })));
-
-      // Find user
-      const foundUser = users.find(
-        (u: any) => u.email === trimmedEmail && u.password === trimmedPassword
-      );
-
-      if (!foundUser) {
-        console.log("❌ Login failed: User not found or wrong password");
-        alert("Email atau password salah!");
-        return false;
-      }
-
-      console.log("✅ Login success:", { email: trimmedEmail, role: foundUser.role });
-
-      // Set user (without password)
-      const userWithoutPassword = {
-        id: foundUser.id,
-        name: foundUser.name,
-        email: foundUser.email,
-        phone: foundUser.phone,
-        role: foundUser.role || "buyer", // Default to buyer for old accounts
-      };
-      setUser(userWithoutPassword);
-      localStorage.setItem("umkm_user", JSON.stringify(userWithoutPassword));
-
-      return true;
-    } catch (error) {
-      console.error("Login error:", error);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert(error.message);
       return false;
     }
+    return true;
   };
 
-  const logout = () => {
+  const register = async (name: string, email: string, phone: string, password: string, role: "buyer" | "seller"): Promise<boolean> => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // Kita simpan role & nama di metadata
+        data: {
+          name: name,
+          phone: phone,
+          role: role,
+        },
+      },
+    });
+    if (error) {
+      alert(error.message);
+      return false;
+    }
+
+    // Buat toko kosong jika mendaftar sebagai seller
+    // (Ini bisa juga di-trigger oleh Supabase Function/Trigger)
+    if (role === 'seller') {
+      // Kita perlu login dulu untuk dapat user id
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      if(loginData.user) {
+        // Buat toko default
+        await supabase.from('stores').insert({ 
+          name: `${name}'s Store`, 
+          description: 'Toko baru!',
+          owner_id: loginData.user.id
+        });
+      }
+    }
+
+    return true;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("umkm_user");
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        session,
         login,
         register,
         logout,

@@ -45,9 +45,6 @@ export const StoreDetail: React.FC = () => {
 
   // Load store and products from localStorage or dummy data
   useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo(0, 0);
-
     // Load store
     const savedStores = JSON.parse(localStorage.getItem("seller_stores") || "{}");
     const foundStore = savedStores[id || ""] || dummyStores.find((s) => s.id === id);

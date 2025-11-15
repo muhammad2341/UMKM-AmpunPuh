@@ -22,8 +22,6 @@ export const ProductDetail: React.FC = () => {
 
   // Load product from localStorage or dummy data
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
     const savedProducts = JSON.parse(localStorage.getItem("seller_products") || "{}");
     
     // Collect all seller products
@@ -103,6 +101,22 @@ export const ProductDetail: React.FC = () => {
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
+            </div>
+
+            {/* Thumbnail Info */}
+            <div className="flex space-x-2">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="w-20 h-20 bg-gray-100 rounded-lg cursor-pointer hover:border-2 hover:border-green-500 transition"
+                >
+                  <img
+                    src={product.image || "/placeholder.svg"}
+                    alt={`View ${i}`}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -224,6 +238,26 @@ export const ProductDetail: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Quantity Selector */}
+            <div className="flex items-center space-x-4">
+              <span className="font-semibold text-gray-700">Jumlah:</span>
+              <div className="flex items-center border-2 border-gray-300 rounded-lg">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="px-4 py-2 hover:bg-gray-100 transition"
+                >
+                  −
+                </button>
+                <span className="px-6 py-2 font-semibold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="px-4 py-2 hover:bg-gray-100 transition"
+                >
+                  +
+                </button>
+              </div>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex space-x-4">

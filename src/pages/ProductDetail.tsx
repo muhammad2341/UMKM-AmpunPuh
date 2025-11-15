@@ -23,7 +23,7 @@ export const ProductDetail: React.FC = () => {
   // Load product from localStorage or dummy data
   useEffect(() => {
     const savedProducts = JSON.parse(localStorage.getItem("seller_products") || "{}");
-    
+
     // Collect all seller products
     const sellerProducts: Product[] = [];
     Object.keys(savedProducts).forEach((storeId) => {
@@ -63,8 +63,8 @@ export const ProductDetail: React.FC = () => {
 
   const discount = product.originalPrice
     ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      )
+      ((product.originalPrice - product.price) / product.originalPrice) * 100
+    )
     : 0;
 
   const openWhatsApp = (withSize: boolean) => {
@@ -282,7 +282,7 @@ export const ProductDetail: React.FC = () => {
                 />
                 <span>{isFavorite(product.id) ? "Hapus Simpanan" : "Simpan Dulu!"}</span>
               </button>
-              
+
               <button
                 onClick={() => {
                   if (!user) {
@@ -311,6 +311,7 @@ export const ProductDetail: React.FC = () => {
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-gray-900">Pilih Ukuran</h3>
                     <button
+                      aria-label="Tutup modal"
                       onClick={() => {
                         setShowSizeModal(false);
                         setSelectedSize("");
@@ -327,11 +328,10 @@ export const ProductDetail: React.FC = () => {
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`py-3 px-4 font-bold rounded-lg border-2 transition ${
-                          selectedSize === size
+                        className={`py-3 px-4 font-bold rounded-lg border-2 transition ${selectedSize === size
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-white text-gray-700 border-gray-300 hover:border-blue-500"
-                        }`}
+                          }`}
                       >
                         {size}
                       </button>

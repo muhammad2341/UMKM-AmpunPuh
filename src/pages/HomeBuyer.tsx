@@ -1,8 +1,6 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Store as StoreIcon, Star, ArrowRight } from "lucide-react";
+import { Search, MapPin, Store as StoreIcon, Star, ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Carousel } from "../components/Carousel";
 import { ProductCard } from "../components/ProductCard";
 import { categories, products as dummyProducts, advertisementBanners, stores } from "../data/dummy";
@@ -15,32 +13,25 @@ export const HomeBuyer: React.FC = () => {
   const [allStores, setAllStores] = useState<Store[]>(stores);
   const [showAllStores, setShowAllStores] = useState(false);
 
-  // Load products from localStorage (seller additions) and merge with dummy data
   useEffect(() => {
     const savedProducts = JSON.parse(localStorage.getItem("seller_products") || "{}");
-    
-    // Collect all seller products
     const sellerProducts: Product[] = [];
     Object.keys(savedProducts).forEach((storeId) => {
       sellerProducts.push(...savedProducts[storeId]);
     });
 
-    // Merge with dummy products, prioritize seller products
     const mergedProducts = [...dummyProducts];
     sellerProducts.forEach((sellerProduct) => {
       const existingIndex = mergedProducts.findIndex((p) => p.id === sellerProduct.id);
       if (existingIndex >= 0) {
-        // Update existing product
         mergedProducts[existingIndex] = sellerProduct;
       } else {
-        // Add new product
         mergedProducts.push(sellerProduct);
       }
     });
 
     setAllProducts(mergedProducts);
 
-    // Merge store edits from localStorage for up-to-date store info
     const savedStores = JSON.parse(localStorage.getItem("seller_stores") || "{}");
     if (savedStores && typeof savedStores === "object") {
       const mergedStores = [...stores];
@@ -51,8 +42,6 @@ export const HomeBuyer: React.FC = () => {
         }
       });
       setAllStores(mergedStores);
-    } else {
-      setAllStores(stores);
     }
   }, []);
 
@@ -65,190 +54,230 @@ export const HomeBuyer: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Filter stores by selectedCategory and searchQuery as well
   const filteredStores = allStores.filter((store) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       q === "" ||
       store.name.toLowerCase().includes(q) ||
-      (store.description || "").toLowerCase().includes(q) ||
-      (store.address || "").toLowerCase().includes(q);
+      (store.description || "").toLowerCase().includes(q);
     const matchesCategory =
       selectedCategory === "" || store.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  // Reset expansion when filters change
   useEffect(() => {
     setShowAllStores(false);
   }, [selectedCategory, searchQuery]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Carousel (same as LandingPage) */}
-      <section className="py-6 px-4 md:px-8 lg:px-12">
+    <main className="min-h-screen pt-24">
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }}></div>
+      </div>
+
+      {/* Carousel Section */}
+      <section className="relative py-8 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
         <Carousel items={advertisementBanners} />
       </section>
 
-          
-
-      {/* Search Bar + Maps Button */}
-      <section className="py-8 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Cari produk atau toko..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 text-gray-700"
-            />
+      {/* Search & Maps Section */}
+      <section className="relative py-8 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          {/* Search Bar with Futuristic Design */}
+          <div className="relative flex-1 w-full group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity"></div>
+            <div className="relative glass rounded-2xl overflow-hidden">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Cari produk atau toko..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-14 pr-6 py-5 bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none font-semibold"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Maps Button */}
           <Link
             to="/maps"
-            className="inline-flex items-center justify-center gap-3 px-7 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-bold rounded-2xl hover:shadow-xl transition whitespace-nowrap text-lg"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold rounded-2xl hover-lift hover-glow transition-all duration-300 group whitespace-nowrap"
           >
-            <MapPin size={22} />
-            <span>Lihat Semua Toko di Peta</span>
+            <MapPin className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+            <span>Peta Toko</span>
+            <Sparkles className="w-5 h-5 animate-pulse" />
           </Link>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-8 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Kategori Produk
-        </h2>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 overflow-x-auto">
+      {/* Categories Section */}
+      <section className="relative py-8 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
+            <Zap className="w-8 h-8 text-blue-500" />
+            Kategori Produk
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
+          {/* All Categories Button */}
           <button
             onClick={() => setSelectedCategory("")}
-            className={`p-4 rounded-lg font-semibold transition text-center whitespace-nowrap ${
-              selectedCategory === ""
-                ? "bg-gradient-to-r from-yellow-400 to-green-500 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200"
-            }`}
+            className={`group relative p-6 rounded-2xl transition-all duration-300 ${selectedCategory === ""
+                ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
+                : "glass hover:scale-105"
+              }`}
           >
-            <div className="text-3xl mb-1">🏠</div>
-            <span className="text-xs md:text-sm">Semua</span>
+            <div className="flex flex-col items-center space-y-2">
+              <div className={`text-4xl transform group-hover:scale-110 transition-transform ${selectedCategory === "" ? "animate-pulse" : ""
+                }`}>
+                🏠
+              </div>
+              <span className={`text-xs md:text-sm font-bold ${selectedCategory === "" ? "text-white" : "text-slate-700"
+                }`}>
+                Semua
+              </span>
+            </div>
           </button>
+
+          {/* Category Buttons */}
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.name)}
-              className={`p-4 rounded-lg font-semibold transition text-center whitespace-nowrap ${
-                selectedCategory === cat.name
-                  ? "bg-gradient-to-r from-yellow-400 to-green-500 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200"
-              }`}
+              className={`group relative p-6 rounded-2xl transition-all duration-300 ${selectedCategory === cat.name
+                  ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 hover-glow"
+                  : "glass hover:scale-105"
+                }`}
             >
-              <div className="text-3xl mb-1">{cat.icon}</div>
-              <span className="text-xs md:text-sm">{cat.name}</span>
+              <div className="flex flex-col items-center space-y-2">
+                <div className={`text-4xl transform group-hover:scale-110 group-hover:rotate-6 transition-all ${selectedCategory === cat.name ? "animate-pulse" : ""
+                  }`}>
+                  {cat.icon}
+                </div>
+                <span className={`text-xs md:text-sm font-bold ${selectedCategory === cat.name ? "text-white" : "text-slate-700"
+                  }`}>
+                  {cat.name}
+                </span>
+              </div>
             </button>
           ))}
         </div>
       </section>
 
       {/* Products Section */}
-      <section className="py-12 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">
-          Produk untuk Anda
-        </h2>
+      <section className="relative py-12 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-3xl font-black gradient-text">Produk untuk Anda</h2>
+          {filteredProducts.length > 0 && (
+            <span className="glass px-4 py-2 rounded-full text-sm font-bold text-slate-600">
+              {filteredProducts.length} produk
+            </span>
+          )}
+        </div>
 
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {filteredProducts.map((product, idx) => (
+              <div key={product.id} className="animate-scale-in" style={{ animationDelay: `${idx * 0.05}s` }}>
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Produk tidak ditemukan</p>
+          <div className="text-center py-20 glass rounded-3xl">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-slate-500 text-lg font-semibold">Produk tidak ditemukan</p>
           </div>
         )}
       </section>
 
-      {/* Featured Stores Section (di bawah list produk) */}
-      <section className="py-12 bg-gray-50">
+      {/* Featured Stores Section */}
+      <section className="relative py-12 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-          <div className="flex items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <StoreIcon className="text-green-600" size={28} />
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-black gradient-text flex items-center gap-3">
+              <StoreIcon className="w-8 h-8 text-purple-500" />
               Toko Pilihan
             </h2>
           </div>
 
           {filteredStores.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {(showAllStores ? filteredStores : filteredStores.slice(0, 8)).map((store) => (
-              <Link
-                key={store.id}
-                to={`/store/${store.id}`}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group"
-              >
-                <div className="relative overflow-hidden bg-gray-100 h-40">
-                  <img
-                    src={store.image || "/placeholder-store.svg"}
-                    alt={store.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  {store.category && (
-                    <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      {store.category}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {(showAllStores ? filteredStores : filteredStores.slice(0, 8)).map((store, idx) => (
+                  <Link
+                    key={store.id}
+                    to={`/store/${store.id}`}
+                    className="card-futuristic overflow-hidden animate-scale-in"
+                    style={{ animationDelay: `${idx * 0.05}s` }}
+                  >
+                    <div className="relative overflow-hidden h-48 bg-gradient-to-br from-slate-100 to-slate-50">
+                      <div className="absolute inset-0 grid-background opacity-20"></div>
+                      <img
+                        src={store.image}
+                        alt={store.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      {store.category && (
+                        <div className="absolute top-3 right-3 glass px-3 py-1 rounded-full">
+                          <span className="text-xs font-bold text-blue-600">{store.category}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
-                    {store.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {store.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={14}
-                            className={
-                              i < Math.floor(store.rating)
-                                ? "fill-current"
-                                : "text-gray-300"
-                            }
-                          />
-                        ))}
+                    <div className="p-5 space-y-3">
+                      <h3 className="font-bold text-slate-800 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {store.name}
+                      </h3>
+                      <p className="text-sm text-slate-600 line-clamp-2">{store.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${i < Math.floor(store.rating)
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-slate-200"
+                                }`}
+                            />
+                          ))}
+                          <span className="text-sm font-bold text-slate-700 ml-1">{store.rating}</span>
+                        </div>
+                        <span className="text-xs text-slate-500 font-semibold">
+                          {store.products?.length || 0} Produk
+                        </span>
                       </div>
-                      <span className="text-sm text-gray-600 font-semibold">
-                        {store.rating}
-                      </span>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {store.products?.length || 0} Produk
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">Toko tidak ditemukan</div>
-          )}
+                  </Link>
+                ))}
+              </div>
 
-          {/* Lihat lainnya button at bottom */}
-          {!showAllStores && filteredStores.length > 8 && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => setShowAllStores(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-green-500 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition"
-              >
-                Lihat lainnya
-                <ArrowRight size={18} />
-              </button>
+              {!showAllStores && filteredStores.length > 8 && (
+                <div className="mt-10 flex justify-center">
+                  <button
+                    onClick={() => setShowAllStores(true)}
+                    className="inline-flex items-center gap-3 px-8 py-4 glass rounded-2xl font-bold text-slate-700 hover-lift hover-glow transition-all group"
+                  >
+                    <span>Lihat Semua Toko</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-20 glass rounded-3xl">
+              <div className="text-6xl mb-4">🏪</div>
+              <p className="text-slate-500 text-lg font-semibold">Toko tidak ditemukan</p>
             </div>
           )}
         </div>

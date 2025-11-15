@@ -225,6 +225,24 @@ export const HomeBuyer: React.FC = () => {
           )}
         </section>
 
+            {filteredStores.length > 8 && !showAllStores && (
+              <button
+                onClick={() => setShowAllStores(true)}
+                className="hidden md:flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold hover-lift hover-glow transition-all duration-300 group"
+              >
+                <span>Lihat Semua</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </button>
+            )}
+          </div>
+
+          {filteredStores.length > 0 ? (
+            <>
+              {/* Store Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {(showAllStores ? filteredStores : filteredStores.slice(0, 8)).map((store, idx) => (
+                  <StoreCard key={store.id} store={store} index={idx} />
+                ))}
         {/* Featured Stores Section */}
         <section className="relative py-12 bg-gradient-to-br from-slate-50 to-white">
           <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">

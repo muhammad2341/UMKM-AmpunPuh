@@ -33,12 +33,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = (name: string, email: string, phone: string, password: string, role: "buyer" | "seller"): boolean => {
     try {
+      // Trim whitespace from inputs
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+      const trimmedName = name.trim();
+      const trimmedPhone = phone.trim();
+
       // Get existing users from localStorage
       const usersData = localStorage.getItem("umkm_users");
       const users = usersData ? JSON.parse(usersData) : [];
 
       // Check if email already exists
-      if (users.some((u: any) => u.email === email)) {
+      if (users.some((u: any) => u.email === trimmedEmail)) {
         alert("Email sudah terdaftar!");
         return false;
       }
@@ -46,19 +52,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Create new user
       const newUser = {
         id: Date.now().toString(),
-        name,
-        email,
-        phone,
-        password, // In production, this should be hashed!
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        password: trimmedPassword, // In production, this should be hashed!
         role,
       };
+
+      console.log("✅ Register success:", { email: trimmedEmail, role });
 
       // Save to users list
       users.push(newUser);
       localStorage.setItem("umkm_users", JSON.stringify(users));
 
       // Auto login after register
-      const userWithoutPassword = { id: newUser.id, name, email, phone, role };
+      const userWithoutPassword = { id: newUser.id, name: trimmedName, email: trimmedEmail, phone: trimmedPhone, role };
       setUser(userWithoutPassword);
       localStorage.setItem("umkm_user", JSON.stringify(userWithoutPassword));
 
@@ -71,19 +79,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (email: string, password: string): boolean => {
     try {
+      // Trim whitespace from inputs
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+
       // Get users from localStorage
       const usersData = localStorage.getItem("umkm_users");
       const users = usersData ? JSON.parse(usersData) : [];
 
+      console.log("🔍 Login attempt:", { email: trimmedEmail });
+      console.log("📋 Available users:", users.map((u: any) => ({ email: u.email, role: u.role })));
+
       // Find user
       const foundUser = users.find(
-        (u: any) => u.email === email && u.password === password
+        (u: any) => u.email === trimmedEmail && u.password === trimmedPassword
       );
 
       if (!foundUser) {
+        console.log("❌ Login failed: User not found or wrong password");
         alert("Email atau password salah!");
         return false;
       }
+
+      console.log("✅ Login success:", { email: trimmedEmail, role: foundUser.role });
 
       // Set user (without password)
       const userWithoutPassword = {

@@ -187,15 +187,15 @@ export const StoreDetail: React.FC = () => {
               {/* Contact Info */}
               <div className="space-y-3 pt-4 border-t-2 border-gray-200">
                 <div className="flex gap-3 flex-wrap">
-                  <a
-                    href={lat && lng
+                  <Link
+                    to={lat && lng
                       ? `/maps?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&storeId=${encodeURIComponent(store.id)}&label=${encodeURIComponent(store.name)}`
                       : `/maps?storeId=${encodeURIComponent(store.id)}&q=${encodeURIComponent(store.name)}`}
                     className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
                   >
                     <Map size={18} />
                     <span>Lihat di Halaman Maps</span>
-                  </a>
+                  </Link>
                   
                   {lat && lng && (
                     <a

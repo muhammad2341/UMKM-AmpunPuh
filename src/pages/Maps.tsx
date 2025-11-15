@@ -89,7 +89,7 @@ const createLabeledIcon = (storeName: string, category?: string, isSelected?: bo
   });
 };
 
-// Component to handle auto-opening popup for selected store
+// Component to handle auto-opening popup for selected store (by center proximity)
 const AutoOpenPopup: React.FC<{ storeId: string | null; center: LatLngExpression }> = ({ storeId, center }) => {
   const map = useMap();
   
@@ -101,9 +101,18 @@ const AutoOpenPopup: React.FC<{ storeId: string | null; center: LatLngExpression
     
     // Small delay to ensure markers are rendered
     const timer = setTimeout(() => {
+      const [clat, clng] = center as [number, number];
+      const threshold = 0.0008; // ~<100m
       map.eachLayer((layer: any) => {
-        if (layer.options && layer.options.storeId === storeId) {
-          layer.openPopup();
+        if (typeof layer.getLatLng === "function") {
+          const ll = layer.getLatLng();
+          if (
+            ll &&
+            Math.abs(ll.lat - clat) < threshold &&
+            Math.abs(ll.lng - clng) < threshold
+          ) {
+            layer.openPopup();
+          }
         }
       });
     }, 300);
@@ -239,7 +248,6 @@ export const Maps: React.FC = () => {
                   key={store.id}
                   position={store.position}
                   icon={labeledIcon}
-                  storeId={store.id}
                 >
                   <Popup>
                     <div className="p-2 min-w-[200px]">

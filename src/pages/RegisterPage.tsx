@@ -47,12 +47,15 @@ const RegisterPage: React.FC = () => {
     
     if (success) {
       alert("Registrasi berhasil! Anda akan diarahkan ke halaman Anda.");
-      // Redirect based on role
-      if (selectedRole === "seller") {
-        navigate("/dashboard-seller");
-      } else {
-        navigate("/home");
-      }
+      // Wait for state to update before navigating
+      setTimeout(() => {
+        // Redirect based on role
+        if (selectedRole === "seller") {
+          navigate("/dashboard-seller");
+        } else {
+          navigate("/home");
+        }
+      }, 100);
     }
   };
 

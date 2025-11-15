@@ -30,25 +30,28 @@ const LoginPage: React.FC = () => {
     const success = login(formData.email, formData.password);
     
     if (success) {
-      // Get user data from localStorage to check role
-      const userData = localStorage.getItem("umkm_user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        
-        // Check if role matches selection and give warning
-        if (parsedUser.role !== selectedRole) {
-          const actualRole = parsedUser.role === "buyer" ? "Pembeli" : "Penjual";
-          const selectedRoleText = selectedRole === "buyer" ? "Pembeli" : "Penjual";
-          alert(`Perhatian: Akun ini terdaftar sebagai ${actualRole}, bukan ${selectedRoleText}. Anda akan diarahkan ke halaman yang sesuai.`);
+      // Wait for state to update before navigating
+      setTimeout(() => {
+        // Get user data from localStorage to check role
+        const userData = localStorage.getItem("umkm_user");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          
+          // Check if role matches selection and give warning
+          if (parsedUser.role !== selectedRole) {
+            const actualRole = parsedUser.role === "buyer" ? "Pembeli" : "Penjual";
+            const selectedRoleText = selectedRole === "buyer" ? "Pembeli" : "Penjual";
+            alert(`Perhatian: Akun ini terdaftar sebagai ${actualRole}, bukan ${selectedRoleText}. Anda akan diarahkan ke halaman yang sesuai.`);
+          }
+          
+          // Redirect based on actual user role (not selected role)
+          if (parsedUser.role === "seller") {
+            navigate("/dashboard-seller");
+          } else {
+            navigate("/home");
+          }
         }
-        
-        // Redirect based on actual user role (not selected role)
-        if (parsedUser.role === "seller") {
-          navigate("/dashboard-seller");
-        } else {
-          navigate("/home");
-        }
-      }
+      }, 100); // Small delay to ensure state is updated
     }
   };
 

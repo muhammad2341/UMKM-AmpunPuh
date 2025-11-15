@@ -319,6 +319,14 @@ export const products: Product[] = [
     storeId: "1",
     storeName: "Rawon Bu Hadi",
     description: "Hidangan berkuah hitam khas Jawa Timur dengan daging empuk dan bumbu kluwek yang kaya rasa. Kuahnya gurih, aromatik, dan hangat, sangat cocok dinikmati bersama nasi putih hangat serta sambal dan kecambah segar.",
+    ingredients: ["Daging sapi", "Kluwek", "Lengkuas", "Serai", "Bawang merah", "Bawang putih", "Kemiri", "Kunyit", "Jahe", "Daun jeruk", "Kecambah", "Sambal"],
+    nutritionInfo: {
+      calories: 450,
+      protein: "28g",
+      carbs: "35g",
+      fat: "22g",
+      fiber: "3g",
+    },
     isAvailable: false,
   },
   {
@@ -332,6 +340,14 @@ export const products: Product[] = [
     storeId: "1",
     storeName: "Rawon Bu Hadi",
     description: "Sayur sop dengan kuah bening gurih berisi wortel, kentang, kol, dan sayuran segar lainnya. Cocok sebagai menu rumahan yang ringan, sehat, dan menyegarkan, ideal untuk disantap kapan saja.",
+    ingredients: ["Wortel", "Kentang", "Kol", "Buncis", "Seledri", "Daun bawang", "Bawang merah", "Bawang putih", "Kaldu ayam"],
+    nutritionInfo: {
+      calories: 180,
+      protein: "6g",
+      carbs: "28g",
+      fat: "5g",
+      fiber: "6g",
+    },
     isAvailable: true,
   },
   {
@@ -344,7 +360,15 @@ export const products: Product[] = [
     reviews: 124,
     storeId: "1",
     storeName: "Rawon Bu Hadi",
-    description: "",
+    description: "Nasi putih hangat, pulen, dan harum. Pendamping sempurna untuk segala jenis lauk.",
+    ingredients: ["Beras putih", "Air"],
+    nutritionInfo: {
+      calories: 204,
+      protein: "4g",
+      carbs: "45g",
+      fat: "0.4g",
+      fiber: "0.6g",
+    },
     isAvailable: true,
   },
   {
@@ -358,6 +382,14 @@ export const products: Product[] = [
     storeId: "2",
     storeName: "Warung Mak Ni",
     description: "Hidangan nasi dengan aneka sayuran rebus yang disiram sambal pecel kacang khas, beraroma wangi dan bercita rasa gurih pedas. Cocok untuk sarapan maupun makan siang dengan tambahan rempeyek atau lauk pilihan.",
+    ingredients: ["Kacang tanah", "Kangkung", "Bayam", "Kacang panjang", "Tauge", "Kol", "Cabai", "Kencur", "Asam jawa", "Gula merah", "Rempeyek"],
+    nutritionInfo: {
+      calories: 320,
+      protein: "12g",
+      carbs: "42g",
+      fat: "12g",
+      fiber: "8g",
+    },
     isAvailable: false,
   },
   {
@@ -371,6 +403,14 @@ export const products: Product[] = [
     storeId: "2",
     storeName: "Warung Mak Ni",
     description: "Nasi putih hangat disajikan bersama beragam lauk seperti sayur, daging/ayam, sambal, dan pelengkap lainnya. Perpaduan lengkap dalam satu piring, ideal untuk yang menginginkan menu praktis namun tetap nikmat.",
+    ingredients: ["Nasi putih", "Ayam goreng", "Tempe", "Tahu", "Telur", "Sayur lodeh", "Sambal", "Kerupuk"],
+    nutritionInfo: {
+      calories: 520,
+      protein: "22g",
+      carbs: "68g",
+      fat: "18g",
+      fiber: "5g",
+    },
     isAvailable: false,
   },
   {
@@ -384,6 +424,14 @@ export const products: Product[] = [
     storeId: "2",
     storeName: "Warung Mak Ni",
     description: "Menu nasi sederhana namun menggugah selera, berisi sayur, lauk pilihan, dan sambal yang menambah kenikmatan. Cocok untuk hidangan cepat saji dengan cita rasa rumahan yang akrab di lidah.",
+    ingredients: ["Nasi putih", "Ayam suwir", "Sambal goreng ati", "Kering tempe", "Serundeng", "Sambal terasi"],
+    nutritionInfo: {
+      calories: 480,
+      protein: "20g",
+      carbs: "58g",
+      fat: "16g",
+      fiber: "4g",
+    },
     isAvailable: false,
   },
   {
@@ -645,25 +693,9 @@ export const products: Product[] = [
 ];
 
 // Assign products to stores
-stores[0].products = products.filter((p) => p.storeId === "1");
-stores[1].products = products.filter((p) => p.storeId === "2");
-stores[2].products = products.filter((p) => p.storeId === "3");
-stores[3].products = products.filter((p) => p.storeId === "4");
-stores[4].products = products.filter((p) => p.storeId === "5");
-stores[5].products = products.filter((p) => p.storeId === "6");
-stores[6].products = products.filter((p) => p.storeId === "7");
-stores[7].products = products.filter((p) => p.storeId === "8");
-stores[8].products = products.filter((p) => p.storeId === "9");
-stores[9].products = products.filter((p) => p.storeId === "10");
-stores[10].products = products.filter((p) => p.storeId === "11");
-stores[11].products = products.filter((p) => p.storeId === "12");
-stores[12].products = products.filter((p) => p.storeId === "13");
-stores[13].products = products.filter((p) => p.storeId === "14");
-stores[14].products = products.filter((p) => p.storeId === "15");
-stores[15].products = products.filter((p) => p.storeId === "16");
-stores[16].products = products.filter((p) => p.storeId === "17");
-stores[17].products = products.filter((p) => p.storeId === "18");
-stores[18].products = products.filter((p) => p.storeId === "19");
+stores.forEach((store) => {
+  store.products = products.filter((p) => p.storeId === store.id);
+});
 
 export const advertisementBanners = [
   {

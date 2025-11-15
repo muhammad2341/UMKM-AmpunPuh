@@ -199,6 +199,46 @@ export const ProductDetail: React.FC = () => {
               </div>
             )}
 
+            {/* Nutrition Info */}
+            {product.nutritionInfo && (
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-200">
+                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🍽️</span>
+                  Informasi Nutrisi (per porsi)
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                    <p className="text-2xl font-bold text-orange-600">{product.nutritionInfo.calories}</p>
+                    <p className="text-xs text-gray-600 mt-1">Kalori</p>
+                  </div>
+                  {product.nutritionInfo.protein && (
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <p className="text-2xl font-bold text-blue-600">{product.nutritionInfo.protein}</p>
+                      <p className="text-xs text-gray-600 mt-1">Protein</p>
+                    </div>
+                  )}
+                  {product.nutritionInfo.carbs && (
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <p className="text-2xl font-bold text-yellow-600">{product.nutritionInfo.carbs}</p>
+                      <p className="text-xs text-gray-600 mt-1">Karbohidrat</p>
+                    </div>
+                  )}
+                  {product.nutritionInfo.fat && (
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <p className="text-2xl font-bold text-red-600">{product.nutritionInfo.fat}</p>
+                      <p className="text-xs text-gray-600 mt-1">Lemak</p>
+                    </div>
+                  )}
+                  {product.nutritionInfo.fiber && (
+                    <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                      <p className="text-2xl font-bold text-green-600">{product.nutritionInfo.fiber}</p>
+                      <p className="text-xs text-gray-600 mt-1">Serat</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Quantity Selector */}
             <div className="flex items-center space-x-4">
               <span className="font-semibold text-gray-700">Jumlah:</span>
